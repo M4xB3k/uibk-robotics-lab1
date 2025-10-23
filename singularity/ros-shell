@@ -1,0 +1,39 @@
+#!/bin/bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+echo $SCRIPT_DIR
+
+# Check if $HOME/ros_home exists
+if [ ! -d "$HOME/ros_home" ]; then
+    echo "Error: \$HOME/ros_home does not exist. Aborting."
+    exit 1
+fi
+
+# Check if IR_IMAGE_PATH is set or noetic.sif is found in the same folder
+if [ -z "$IR_IMAGE_PATH" ]; then
+    IR_IMAGE_PATH=$SCRIPT_DIR/noetic.sif
+    if [ ! -f $IR_IMAGE_PATH ]; then
+	echo "Error: \$IR_IMAGE_PATH is not set, and image 'noetic.sif' not found in folder of ros_shell. Aborting."
+	exit 1
+
+    fi
+fi
+
+# Check if IR_OVERLAY_PATH is set
+if [ -z "$IR_OVERLAY_PATH" ]; then
+    # Set IR_IMAGE_FOLDER to the folder where noetic.sif was found
+    IR_IMAGE_FOLDER="$(dirname "$IR_IMAGE_PATH")"
+
+    # Set IR_OVERLAY_PATH to the subfolder "overlay"
+    IR_OVERLAY_PATH="$IR_IMAGE_FOLDER/overlay"
+
+    # Create IR_OVERLAY_PATH if it does not exist
+    if [ ! -d "$IR_OVERLAY_PATH" ]; then
+	mkdir -p "$IR_OVERLAY_PATH"
+    fi
+fi
+
+echo "image found at: $IR_IMAGE_PATH"
+echo "overlay at: $IR_OVERLAY_PATH"
+# Run the singularity command
+export APPTAINER_BINDPATH="/run"
+singularity run --overlay="$IR_OVERLAY_PATH" "$IR_IMAGE_PATH"

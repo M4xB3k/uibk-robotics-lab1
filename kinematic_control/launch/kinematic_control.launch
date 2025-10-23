@@ -1,0 +1,7 @@
+<?mxl version="1.0"?>
+<launch>
+    <node name="kinematic_control_node" pkg="kinematic_control" type="kinematic_control_node.py" output="screen"/>
+    <param name="position_gain" type="double" value="0.1" />
+    <param name="orientation_gain" type="double" value="0.05" />
+    <param name="damping_coefficient" type="double" value="1E-10" />
+</launch>

@@ -1,0 +1,38 @@
+Bootstrap: docker
+
+From: ubuntu:20.04
+
+%post
+  apt-get -y update
+  apt-get -y upgrade
+  DEBIAN_FRONTEND=noninteractive apt-get -y -q --force-yes install lsb-release gnupg2 wget tar xz-utils libavcodec-dev libavformat-dev libswscale-dev python3-zmq less nano psmisc tmux
+  sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+  apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  apt-get -y update
+  DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y -q --force-yes ros-noetic-desktop-full
+  mkdir -p /opt
+  wget -O CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04.tar.xz  https://www.coppeliarobotics.com/files/CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04.tar.xz
+  xz -d CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04.tar.xz && tar -xvvf CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04.tar -C /opt/
+  rm CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04.tar
+  apt-get clean
+  rm -rf /var/cache/apt/archives /var/lib/apt/lists
+
+%environment
+  export COPPELIASIM_ROOT_DIR=/opt/CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu20_04
+  export ROS_ROOT=/opt/ros/noetic/share/ros
+  export ROS_PACKAGE_PATH=/opt/ros/noetic/share:/opt/ros/noetic/stacks
+  export ROS_MASTER_URI=http://localhost:11311
+  export LD_LIBRARY_PATH=/opt/ros/noetic/lib:/.singularity.d/libs:$COPPELIASIM_ROOT_DIR
+  export CPATH=/opt/ros/noetic/include
+  export PATH=/opt/ros/noetic/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$COPPELIASIM_ROOT_DIR
+  export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages
+  export PKG_CONFIG_PATH=/opt/ros/noetic/lib/pkgconfig
+  export CMAKE_PREFIX_PATH=/opt/ros/noetic
+  export ROS_ETC_DIR=/opt/ros/noetic/etc/ros
+  export HOME=$HOME/ros_home
+  export HISTFILE=$HOME/ros.hist
+
+%files
+  runscript.sh /runscript.sh
+%runscript
+  /runscript.sh "$@"
